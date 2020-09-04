@@ -24,7 +24,7 @@ import org.springframework.context.annotation.Configuration;
 
 import javax.sql.DataSource;
 
-//@Configuration
+@Configuration
 @EnableBatchProcessing
 public class SpringBatchConfig {
 
@@ -43,12 +43,10 @@ public class SpringBatchConfig {
 
 
     @Bean
-    public Job importCountriesJob(JobCompletionNotificationListener listener, Step step1) {
+    public Job importCountriesJob(@Autowired Step stepLoadFromHttp, @Autowired Step stepCopyCountriesTable ) {
         return jobBuilderFactory.get("importUserJob")
-                .incrementer(new RunIdIncrementer())
-                .listener(listener)
-                .flow(step1)
-                .end()
+                .start(stepLoadFromHttp)
+                .next(stepCopyCountriesTable)
                 .build();
     }
 
@@ -69,6 +67,19 @@ public class SpringBatchConfig {
                 .build();
     }
 
+
+    @Bean
+    public Step stepCopyCountriesTable( @Autowired
+                                        ItemReader<CountryEntity> countryEntityItemReader,
+                                        @Autowired
+                                        ItemWriter<CountryEntity> countryEntityCopyJdbcWriter) {
+
+        return stepBuilderFactory.get("stepCopyCountriesTable")
+                .<CountryEntity, CountryEntity> chunk(10)
+                .reader(countryEntityItemReader)
+                .writer(countryEntityCopyJdbcWriter)
+                .build();
+    }
 
     //Readers-writers
     @Bean
@@ -98,6 +109,8 @@ public class SpringBatchConfig {
     @Bean
     public ItemReader<CountryEntity> countryEntityItemReader(){
        return new JdbcCursorItemReaderBuilder<CountryEntity>()
+               .name("countryEntityItemReader")
+               .sql("SELECT CODE, NAME, PHONECODE FROM COUNTRIES")
                .fetchSize(10)
                .rowMapper( (resultSet,i) ->{
                    CountryEntity countryEntity = new CountryEntity();
