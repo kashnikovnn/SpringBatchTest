@@ -3,6 +3,7 @@ package com.jetlyn.springbatchtest.config;
 import com.jetlyn.springbatchtest.batch.readers.CountriesHttpItemReader;
 import com.jetlyn.springbatchtest.dataloaders.DataLoader;
 import com.jetlyn.springbatchtest.entities.CountryEntity;
+import com.jetlyn.springbatchtest.tools.SqlQueryConstructor;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
@@ -12,17 +13,22 @@ import org.springframework.batch.item.ItemReader;
 import org.springframework.batch.item.ItemWriter;
 import org.springframework.batch.item.database.BeanPropertyItemSqlParameterSourceProvider;
 import org.springframework.batch.item.database.JdbcBatchItemWriter;
-import org.springframework.batch.item.database.JdbcCursorItemReader;
-import org.springframework.batch.item.database.JdbcPagingItemReader;
 import org.springframework.batch.item.database.builder.JdbcBatchItemWriterBuilder;
 import org.springframework.batch.item.database.builder.JdbcCursorItemReaderBuilder;
-import org.springframework.batch.item.database.builder.JdbcPagingItemReaderBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Lazy;
+import org.springframework.context.annotation.Scope;
 
 import javax.sql.DataSource;
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
+import java.sql.SQLException;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 
 @Configuration
 @EnableBatchProcessing
@@ -42,7 +48,7 @@ public class SpringBatchConfig {
     DataLoader dataLoader;
 
 
-    @Bean
+    //@Bean
     public Job importCountriesJob(@Autowired Step stepLoadFromHttp, @Autowired Step stepCopyCountriesTable ) {
         return jobBuilderFactory.get("importUserJob")
                 .start(stepLoadFromHttp)
@@ -51,7 +57,25 @@ public class SpringBatchConfig {
     }
 
 
-    // Steps
+
+
+
+    /* Steps
+    @Bean
+    public Step universalTableCopy(@Autowired
+                                 @Qualifier("universalItemReader")
+                                         ItemReader<ResultSet> reader,
+                                 @Autowired
+                                 @Qualifier("universalJdbcWriter")
+                                         ItemWriter<ResultSet> writer) {
+
+        return stepBuilderFactory.get("stepLoadFromHttp")
+                .<ResultSet, ResultSet> chunk(10)
+                .reader(reader)
+                .writer(writer)
+                .build();
+    } */
+
     @Bean
     public Step stepLoadFromHttp(@Autowired
                                  @Qualifier("countriesHttpItemReader")
@@ -82,6 +106,8 @@ public class SpringBatchConfig {
     }
 
     //Readers-writers
+
+
     @Bean
     public ItemReader<CountryEntity> countriesHttpItemReader() {
         return new CountriesHttpItemReader(dataLoader);
@@ -105,6 +131,7 @@ public class SpringBatchConfig {
                 .dataSource(dataSource)
                 .build();
     }
+
 
     @Bean
     public ItemReader<CountryEntity> countryEntityItemReader(){

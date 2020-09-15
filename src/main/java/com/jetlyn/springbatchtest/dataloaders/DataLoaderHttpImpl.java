@@ -12,7 +12,7 @@ import java.util.Iterator;
 import java.util.List;
 
 @Component
-public class DataLoaderHttpImpl implements DataLoader {
+public class  DataLoaderHttpImpl implements DataLoader {
 
     final Logger logger = LoggerFactory.getLogger(DataLoaderHttpImpl.class);
     @Value("${countrynames.url}")
