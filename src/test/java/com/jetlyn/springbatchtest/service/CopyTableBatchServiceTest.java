@@ -21,6 +21,6 @@ class CopyTableBatchServiceTest {
 
     @Test
     void copyTableService() throws JobParametersInvalidException, JobExecutionAlreadyRunningException, JobRestartException, JobInstanceAlreadyCompleteException {
-        copyTableService.copyTableService("COUNTRIES", "OLOLOCOUNTRIES");
+        copyTableService.copyTableService("COUNTRIES", "OLOLO_COUNTRIES");
     }
 }

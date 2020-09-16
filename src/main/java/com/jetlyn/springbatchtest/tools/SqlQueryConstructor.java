@@ -27,7 +27,7 @@ public class SqlQueryConstructor {
 
     public static String createCopyTableQuery(String srcTableName, String dstTableName) {
         StringBuilder stringBuilder = new StringBuilder();
-        stringBuilder.append("CREATE TABLE ");
+        stringBuilder.append("CREATE TABLE IF NOT EXISTS ");
         stringBuilder.append(dstTableName);
         stringBuilder.append(" AS SELECT * FROM ");
         stringBuilder.append(srcTableName);
